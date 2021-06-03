@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useReducer } from 'react';
 import axios from 'axios';
-import {useAsync} from 'react-async';
+// import {useAsync} from 'react-async';
 import User from './User'
+import { useUsersDispatch, useUsersState, getUsers } from './UsersContext';
 
 // function reducer(state, action) {
 //     switch (action.type) {
@@ -28,15 +29,17 @@ import User from './User'
 //     }
 // }
 
-async function getUsers() {
-    const response = await axios.get(
-        'https://jsonplaceholder.typicode.com/users'
-    );
-    return response.data;
-}
+// async function getUsers() {
+//     const response = await axios.get(
+//         'https://jsonplaceholder.typicode.com/users'
+//     );
+//     return response.data;
+// }
 
 function Users() {
     const [userId, setUserId] = useState(null);
+    const state = useUsersState();
+    const dispatch = useUsersDispatch();
     // const [state, dispatch] = useReducer(reducer, {
     //     loading: false,
     //     data: null,
@@ -45,10 +48,13 @@ function Users() {
 
     // const [state, refetch] = useAsync(getUsers, [], true);
 
-    const { data: users, error, isLoading, run } = useAsync({
-        deferFn: getUsers
-    })
-
+    // const { data: users, error, isLoading, run } = useAsync({
+    //     deferFn: getUsers
+    // })
+    const { data: users, loading, error } = state.users;
+    const fetchData = () => {
+        getUsers(dispatch);
+      };
     // const [users, setUsers] = useState(null);
     // const [loading, setLoading] = useState(null);
     // const [error, setError] = useState(null);
@@ -79,9 +85,9 @@ function Users() {
 
     // const { loading, data: users, error } = state; // state.data 를 users 키워드로 조회
 
-    if (isLoading) return <div>로딩중..</div>;
+    if (loading) return <div>로딩중..</div>;
     if (error) return <div>에러가 발생했습니다</div>;
-    if (!users) return <button onClick={run}>불러오기</button>;
+    if (!users) return <button onClick={fetchData}>불러오기</button>;
     return (
         <>
             <ul>
@@ -95,7 +101,7 @@ function Users() {
                     </li>
                 ))}
             </ul>
-            <button onClick={run}>다시 불러오기</button>
+            <button onClick={fetchData}>다시 불러오기</button>
             {userId && <User id={userId} />}
         </>
     );
